@@ -1,0 +1,77 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+
+class CalculatorApp(App):
+    def build(self):
+        self.operators = ['+', '-', '*', '/']
+        self.last_was_operator = None
+        self.result = None
+        self.input_text = ""
+
+        layout = BoxLayout(orientation='vertical', padding=20)
+
+        self.result_label = Label(
+            text="Enter an expression",
+            font_size=30,
+            size_hint_y=None,
+            height=100,
+            halign='right'
+        )
+
+        layout.add_widget(self.result_label)
+
+        buttons = [
+            ['7', '8', '9', '/'],
+            ['4', '5', '6', '*'],
+            ['1', '2', '3', '-'],
+            ['.', '0', '=', '+']
+        ]
+
+        grid_layout = GridLayout(cols=4, spacing=10, size_hint_y=None, height=400)
+
+        for row in buttons:
+            for label in row:
+                button = Button(
+                    text=label,
+                    font_size=24,
+                    background_color=(0.5, 0.5, 0.5, 1),
+                    color=(1, 1, 1, 1),
+                )
+                button.bind(on_press=self.on_button_press)
+                grid_layout.add_widget(button)
+
+        layout.add_widget(grid_layout)
+
+        return layout
+
+    def on_button_press(self, instance):
+        current = self.result_label.text
+        button_text = instance.text
+
+        if button_text == "=":
+            self.on_solution(instance)
+        else:
+            if self.last_was_operator and button_text in self.operators:
+                return
+            elif current == "Enter an expression":
+                self.result_label.text = button_text
+            else:
+                new_text = current + button_text
+                self.result_label.text = new_text
+        self.last_was_operator = button_text in self.operators
+
+    def on_solution(self, instance):
+        text = self.result_label.text
+        try:
+            self.result = str(eval(self.result_label.text))
+            self.result_label.text = self.result
+        except:
+            self.result_label.text = "Error"
+
+
+if __name__ == '__main__':
+    app = CalculatorApp()
+    app.run()
